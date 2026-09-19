@@ -20,7 +20,7 @@ const recipes = [
   { name: 'Herby yogurt bowl', time: '10 min', match: '5 ingredients', icon: '🥣', color: 'sage' },
 ];
 
-const navItems = [{ icon: '▦', label: 'Home', href: '/' }, { icon: '⌂', label: 'My pantry', href: '/pantry' }, { icon: '♧', label: 'Recipes', href: '#recipes' }, { icon: '☷', label: 'Grocery list', href: '#grocery-list' }, { icon: '◒', label: 'My impact', href: '#impact' }, { icon: '◉', label: 'Community', href: '#community' }];
+const navItems = [{ icon: '▦', label: 'Home', href: '/' }, { icon: '⌂', label: 'My pantry', href: '/pantry' }, { icon: '♧', label: 'Recipes', href: '/recipes' }, { icon: '☷', label: 'Grocery list', href: '#grocery-list' }, { icon: '◒', label: 'My impact', href: '#impact' }, { icon: '◉', label: 'Community', href: '#community' }];
 
 function SideNav({ user }: { user: SignedInUser | null }) {
   const name = user?.name ?? 'Guest'; const initials = name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase();

@@ -47,10 +47,11 @@ cp atlas-credentials.env.example atlas-credentials.env
 
 Keep your supplied Atlas values in `backend/atlas-credentials.env`. The backend loads `MONGODB_USERNAME`, `MONGODB_PASSWORD`, and `MONGODB_URI` from that file automatically. Do not commit or paste this file into source control.
 
-Add your OCR.space API key to `backend/.env` after registration:
+Add your OCR.space API key to `backend/.env` after registration. Recipe recommendations call OpenAI Chat Completions with `OPENAI_API_KEY` when set, otherwise this same key:
 
 ```bash
 OCR_SPACE_API_KEY=your-key-goes-here
+OPENAI_API_KEY=
 JWT_SECRET=replace-with-a-long-random-local-secret
 ```
 
@@ -63,7 +64,7 @@ npm run dev
 
 The UI runs at `http://localhost:3000`.
 
-Open `http://localhost:3000/scanner` for the working signup, login, receipt/ingredient upload, and freshness-confidence flow.
+Open `http://localhost:3000/scanner` for signup, login, and receipt upload. Open `http://localhost:3000/recipes` for AI recipe recommendations from your pantry.
 
 ### API
 
