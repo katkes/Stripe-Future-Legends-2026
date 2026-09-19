@@ -23,6 +23,8 @@ const userSchema = new Schema({
   name: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   passwordHash: { type: String, required: true, select: false },
+  role: { type: String, enum: ['customer', 'vendor'], default: 'customer' },
+  neighbourhood: { type: String, default: 'Toronto, ON' },
   pantryItems: { type: [pantryItemSchema], default: [] },
 }, { timestamps: true });
 

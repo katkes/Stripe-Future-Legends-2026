@@ -15,7 +15,9 @@ The dashboard already gives the team a shared visual target for these workstream
 - Grocery list and local price comparison
 - Nutrition, carbon, water, and product swaps
 - Community baskets and group delivery
-- Stripe test checkout and vendor payouts
+- Marketplace vendors, carts, and Stripe Checkout
+
+Marketplace teammate notes: [backend/src/TEAMMATE-CONTRACT.md](backend/src/TEAMMATE-CONTRACT.md).
 
 ## Suggested ownership split
 

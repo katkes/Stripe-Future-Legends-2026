@@ -1,9 +1,19 @@
 import dotenv from 'dotenv';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const backendRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
 // `atlas-credentials.env` is intentionally ignored by Git. Its values take
 // precedence over general local server settings when both files define a key.
-dotenv.config({ path: [resolve(process.cwd(), 'atlas-credentials.env'), resolve(process.cwd(), '.env')], quiet: true });
+dotenv.config({
+  path: [
+    resolve(backendRoot, 'atlas-credentials.env'),
+    resolve(backendRoot, '.env'),
+    resolve(backendRoot, 'env'),
+  ],
+  quiet: true,
+});
 
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
@@ -14,4 +24,8 @@ export const env = {
   clientOrigin: process.env.CLIENT_ORIGIN ?? 'http://localhost:3000',
   jwtSecret: process.env.JWT_SECRET ?? '',
   ocrSpaceApiKey: process.env.OCR_SPACE_API_KEY ?? '',
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? process.env.STRIPE_API_KEY ?? '',
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? '',
+  stripeConnectedAccountId: process.env.STRIPE_CONNECTED_ACCOUNT_ID ?? '',
+  platformFeeBps: Number(process.env.PLATFORM_FEE_BPS ?? 800),
 };
