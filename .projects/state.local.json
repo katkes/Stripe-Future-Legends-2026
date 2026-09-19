@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "project": {
+    "catalog": "prod",
+    "merchantId": "acct_1UHPqZ2KmakgaDOq",
+    "merchantDisplayName": "Siting",
+    "projectId": "project_61VQpBYC4AORev5ez16VQnnvUYA8h3WLev45VjUwqDqS",
+    "projectName": "open-basket",
+    "initializedAt": "2026-09-19T16:35:04.405Z"
+  },
+  "providers": {},
+  "resources": {}
+}
