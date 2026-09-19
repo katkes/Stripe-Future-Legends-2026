@@ -1,0 +1,11 @@
+{
+  "name": "openbasket",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix backend run build && npm --prefix basket-web run build",
+    "build:api": "npm --prefix backend run build",
+    "build:web": "npm --prefix basket-web run build",
+    "dev:api": "npm --prefix backend run dev",
+    "dev:web": "npm --prefix basket-web run dev"
+  }
+}

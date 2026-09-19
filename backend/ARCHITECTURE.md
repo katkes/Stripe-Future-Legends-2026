@@ -2,6 +2,10 @@
 
 This is a MERN-oriented API scaffold. It deliberately has no product logic yet: every feature endpoint returns `501 Not Implemented` until its owner connects it to real controllers, services, and MongoDB models.
 
+## MongoDB connection
+
+The API loads general server settings from `backend/.env` and Atlas values from `backend/atlas-credentials.env`. The latter must define `MONGODB_USERNAME`, `MONGODB_PASSWORD`, and `MONGODB_URI`; it is ignored by Git. The database bootstrap passes the username and password directly to MongoDB and connects automatically when the API starts. Without a URI, the API stays in scaffold mode.
+
 ## Shared layers
 
 | Location | Responsibility |

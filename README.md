@@ -28,14 +28,57 @@ The dashboard already gives the team a shared visual target for these workstream
 | Commerce | Grocery list navigation and later checkout flow |
 | Platform | Authentication, API, MongoDB models, and shared design system |
 
-## Run locally
+## Setup and run
+
+Install each application once:
+
+```bash
+cd basket-web && npm install
+cd ../backend && npm install
+```
+
+Configure the backend without committing credentials:
+
+```bash
+cd backend
+cp .env.example .env
+cp atlas-credentials.env.example atlas-credentials.env
+```
+
+Keep your supplied Atlas values in `backend/atlas-credentials.env`. The backend loads `MONGODB_USERNAME`, `MONGODB_PASSWORD`, and `MONGODB_URI` from that file automatically. Do not commit or paste this file into source control.
+
+### Web UI
 
 ```bash
 cd basket-web
 npm run dev
 ```
 
+The UI runs at `http://localhost:3000`.
+
+### API
+
 ```bash
 cd backend
 npm run dev
+```
+
+The API runs at `http://localhost:4000`; confirm it with `http://localhost:4000/health`.
+
+### Whole project
+
+Use two terminals to run the UI and API concurrently:
+
+```bash
+npm run dev:web
+```
+
+```bash
+npm run dev:api
+```
+
+From the repository root, build both applications with:
+
+```bash
+npm run build
 ```
