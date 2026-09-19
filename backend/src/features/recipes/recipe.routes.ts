@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { assertDatabaseConnected } from '../../config/database.js';
 import { AppError } from '../../core/errors/app-error.js';
 import { optionalAuth } from '../auth/optional-auth.js';
 import { User } from '../auth/user.model.js';
@@ -12,6 +13,7 @@ recipesRouter.get('/recommendations', async (request, response, next) => {
   try {
     let pantry: PantrySnapshot[] = [];
     if (request.auth?.userId) {
+      assertDatabaseConnected();
       const user = await User.findById(request.auth.userId);
       if (!user) throw new AppError(404, 'User not found.');
       pantry = user.pantryItems.map((item) => ({

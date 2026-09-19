@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express from 'express';
+import { isDatabaseConnected } from './config/database.js';
 import { env } from './config/env.js';
 import { errorHandler } from './middleware/error-handler.js';
 import { notFound } from './middleware/not-found.js';
@@ -9,7 +10,12 @@ export const app = express();
 app.use(cors({ origin: env.clientOrigin, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
-app.get('/health', (_request, response) => response.json({ name: 'openbasket-api', status: 'ok', mode: 'scaffold' }));
+app.get('/health', (_request, response) => response.json({
+  name: 'openbasket-api',
+  status: 'ok',
+  mode: isDatabaseConnected() ? 'connected' : 'scaffold',
+  mongo: isDatabaseConnected() ? 'connected' : 'disconnected',
+}));
 app.use('/api/v1', apiRouter);
 app.use(notFound);
 app.use(errorHandler);
