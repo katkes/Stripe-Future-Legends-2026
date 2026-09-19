@@ -23,6 +23,10 @@ export function pantryFor(userId: string) {
   return pantryByUser.get(userId)!;
 }
 
+export function replacePantry(userId: string, items: PantryItem[]) {
+  pantryByUser.set(userId, items);
+}
+
 export function groceryFor(userId: string) {
   if (!groceryByUser.has(userId)) groceryByUser.set(userId, []);
   return groceryByUser.get(userId)!;

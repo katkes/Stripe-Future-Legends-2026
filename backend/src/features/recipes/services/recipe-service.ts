@@ -1,19 +1,29 @@
 import { randomUUID } from 'node:crypto';
 import { AppError } from '../../../core/errors/app-error.js';
+import { User } from '../../auth/user.model.js';
 import { memoryGroceryAdapter } from '../adapters/grocery-list-adapter.js';
 import { memoryPantryAdapter } from '../adapters/pantry-adapter.js';
 import { memoryPreferencesAdapter } from '../adapters/preferences-adapter.js';
 import { memoryRecipeRepository } from '../adapters/recipe-repository.js';
+import { mapStoredPantryItems } from '../adapters/user-pantry.js';
 import { DEMO_USER_ID } from '../data/mock-pantry.js';
 import type { GoalMode, PantryUsage, RecipeIngredient } from '../models.js';
-import { getCookingSession, markCooked, saveCookingSession } from '../stores/memory-store.js';
+import { getCookingSession, markCooked, replacePantry, saveCookingSession } from '../stores/memory-store.js';
 import { recommendRecipes, sectionize, type RecommendationQuery } from './recommendation-service.js';
 import { applySwapPreview } from './swap-service.js';
+
+async function pantryItemsFor(userId: string) {
+  if (userId !== DEMO_USER_ID) {
+    const user = await User.findById(userId).catch(() => null);
+    replacePantry(userId, user ? mapStoredPantryItems(userId, user.pantryItems) : []);
+  }
+  return memoryPantryAdapter.getAvailableItems(userId);
+}
 
 export async function getRecommendations(userId: string, query: RecommendationQuery) {
   const [recipes, pantry, preferences] = await Promise.all([
     memoryRecipeRepository.getAll(),
-    memoryPantryAdapter.getAvailableItems(userId),
+    pantryItemsFor(userId),
     memoryPreferencesAdapter.getPreferences(userId),
   ]);
   const results = recommendRecipes(recipes, pantry, preferences, query, userId);
@@ -34,7 +44,7 @@ export async function getRecipeDetail(userId: string, recipeId: string, goal: Go
   const recipe = await memoryRecipeRepository.getById(recipeId);
   if (!recipe) throw new AppError(404, 'Recipe not found');
   const [pantry, preferences] = await Promise.all([
-    memoryPantryAdapter.getAvailableItems(userId),
+    pantryItemsFor(userId),
     memoryPreferencesAdapter.getPreferences(userId),
   ]);
   const recommendation = recommendRecipes([recipe], pantry, preferences, { goal }, userId)[0];
@@ -82,7 +92,7 @@ export function plannedUsage(recipeServings: number, servingsPrepared: number, i
 export async function completeCooking(userId: string, sessionId: string, recipeId: string, servingsPrepared: number, ingredientUsage?: PantryUsage[]) {
   const recipe = await memoryRecipeRepository.getById(recipeId);
   if (!recipe) throw new AppError(404, 'Recipe not found');
-  const pantry = await memoryPantryAdapter.getAvailableItems(userId);
+  const pantry = await pantryItemsFor(userId);
   const pantryItemIdByFood: Record<string, string> = {};
   for (const item of pantry) {
     if (!pantryItemIdByFood[item.normalizedFoodId]) pantryItemIdByFood[item.normalizedFoodId] = item.id;

@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import { memoryGroceryAdapter } from './adapters/grocery-list-adapter.js';
+import { optionalAuth } from '../auth/require-auth.js';
 import { AppError } from '../../core/errors/app-error.js';
+import { memoryGroceryAdapter } from './adapters/grocery-list-adapter.js';
 import {
   addMissingIngredients,
   completeCooking,
@@ -13,8 +14,8 @@ import {
 } from './services/recipe-service.js';
 import type { GoalMode } from './models.js';
 
-function userId(request: { header: (name: string) => string | undefined }) {
-  return defaultUserId(request.header('x-user-id'));
+function userId(request: { auth?: { userId: string }; header: (name: string) => string | undefined }) {
+  return defaultUserId(request.auth?.userId || request.header('x-user-id'));
 }
 
 function asGoal(value: unknown): GoalMode {
@@ -22,6 +23,7 @@ function asGoal(value: unknown): GoalMode {
 }
 
 export const recipesRouter = Router();
+recipesRouter.use(optionalAuth);
 
 recipesRouter.get('/recommendations', async (request, response, next) => {
   try {
@@ -67,6 +69,7 @@ recipesRouter.post('/:recipeId/cooking-sessions', async (request, response, next
 });
 
 export const groceryListItemsRouter = Router();
+groceryListItemsRouter.use(optionalAuth);
 groceryListItemsRouter.get('/items', async (request, response, next) => {
   try {
     response.json({ items: await memoryGroceryAdapter.listItems(userId(request)) });
@@ -86,6 +89,7 @@ groceryListItemsRouter.post('/items', async (request, response, next) => {
 });
 
 export const cookingSessionsRouter = Router();
+cookingSessionsRouter.use(optionalAuth);
 cookingSessionsRouter.post('/:sessionId/complete', async (request, response, next) => {
   try {
     const recipeId = String(request.body?.recipeId ?? '');
@@ -98,6 +102,7 @@ cookingSessionsRouter.post('/:sessionId/complete', async (request, response, nex
 });
 
 export const pantryConsumptionRouter = Router();
+pantryConsumptionRouter.use(optionalAuth);
 pantryConsumptionRouter.post('/consumption/undo', async (request, response, next) => {
   try {
     const undoToken = String(request.body?.undoToken ?? '');
