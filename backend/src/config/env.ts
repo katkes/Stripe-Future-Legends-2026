@@ -12,4 +12,6 @@ export const env = {
   mongoUsername: process.env.MONGODB_USERNAME ?? '',
   mongoPassword: process.env.MONGODB_PASSWORD ?? '',
   clientOrigin: process.env.CLIENT_ORIGIN ?? 'http://localhost:3000',
+  jwtSecret: process.env.JWT_SECRET ?? '',
+  ocrSpaceApiKey: process.env.OCR_SPACE_API_KEY ?? '',
 };

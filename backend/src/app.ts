@@ -6,9 +6,11 @@ import { notFound } from './middleware/not-found.js';
 import { apiRouter } from './routes/index.js';
 
 export const app = express();
-app.use(cors({ origin: env.clientOrigin }));
+app.use(cors({ origin: env.clientOrigin, credentials: true }));
 app.use(express.json());
+app.use(cookieParser());
 app.get('/health', (_request, response) => response.json({ name: 'openbasket-api', status: 'ok', mode: 'scaffold' }));
 app.use('/api/v1', apiRouter);
 app.use(notFound);
 app.use(errorHandler);
+import cookieParser from 'cookie-parser';

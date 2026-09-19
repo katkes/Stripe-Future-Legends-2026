@@ -1,10 +1,13 @@
 import { Router } from 'express';
 import { createFeatureRouter } from '../shared/http/create-feature-router.js';
+import { authRouter } from '../features/auth/auth.routes.js';
+import { pantryRouter } from '../features/pantry/pantry.routes.js';
+import { receiptRouter } from '../features/receipts/receipt.routes.js';
 
 export const apiRouter = Router();
-apiRouter.use('/auth', createFeatureRouter('authentication'));
-apiRouter.use('/receipts', createFeatureRouter('receipt scanning'));
-apiRouter.use('/pantry', createFeatureRouter('digital pantry'));
+apiRouter.use('/auth', authRouter);
+apiRouter.use('/receipts', receiptRouter);
+apiRouter.use('/pantry', pantryRouter);
 apiRouter.use('/recipes', createFeatureRouter('recipes and meal planning'));
 apiRouter.use('/grocery-lists', createFeatureRouter('smart grocery lists'));
 apiRouter.use('/prices', createFeatureRouter('neighbourhood prices'));
