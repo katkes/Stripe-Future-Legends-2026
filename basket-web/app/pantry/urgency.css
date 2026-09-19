@@ -1,0 +1,4 @@
+.days-left { display: inline-block; margin-top: 10px; border-radius: 999px; padding: 5px 9px; font-size: 10px; font-weight: 700; }
+.days-left.urgent { background: #f6d0cb; color: #943e33; }
+.days-left.soon { background: #ffeca9; color: #79600d; }
+.days-left.fresh { background: #d8ecc9; color: #315b4a; }

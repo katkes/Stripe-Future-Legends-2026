@@ -25,20 +25,28 @@ function categoryFor(name: string) {
   return 'unknown';
 }
 
-function parseDate(value: string) {
-  const iso = value.match(/\b(20\d{2})[-/.](0?[1-9]|1[0-2])[-/.]([0-2]?\d|3[01])\b/);
-  if (iso) return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+function validDate(year: number, month: number, day: number) { const date = new Date(year, month, day); return date.getFullYear() === year && date.getMonth() === month && date.getDate() === day ? date : undefined; }
+function monthIndex(value: string) { return ['ja', 'fe', 'ma', 'ap', 'my', 'jn', 'jl', 'au', 'se', 'oc', 'no', 'de'].indexOf(value.toLowerCase().slice(0, 2)); }
+function parseDate(value: string): { date: Date; text: string } | undefined {
+  const iso = value.match(/\b(20\d{2})\D{1,4}(0?[1-9]|1[0-2])\D{1,4}([0-2]?\d|3[01])\b/);
+  if (iso) { const date = validDate(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3])); if (date) return { date, text: iso[0] }; }
+  const yearFirstNamed = value.match(/\b(20\d{2})\D{0,4}(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|ja|fe|ma|ap|my|jn|jl|au|se|oc|no|de)[a-z]*\D{0,4}([0-2]?\d|3[01])\b/i);
+  if (yearFirstNamed) { const date = validDate(Number(yearFirstNamed[1]), monthIndex(yearFirstNamed[2]), Number(yearFirstNamed[3])); if (date) return { date, text: yearFirstNamed[0] }; }
   const named = value.match(/\b(\d{1,2})\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s*,?\s*(20\d{2})\b/i);
-  if (named) return new Date(Number(named[3]), 'janfebmaraprmayjunjulaugsepoctnovdec'.indexOf(named[2].toLowerCase().slice(0, 3)) / 3, Number(named[1]));
+  if (named) { const date = validDate(Number(named[3]), monthIndex(named[2]), Number(named[1])); if (date) return { date, text: named[0] }; }
+  const monthFirst = value.match(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s*(\d{1,2})\s*,?\s*(20\d{2})\b/i);
+  if (monthFirst) { const date = validDate(Number(monthFirst[3]), monthIndex(monthFirst[1]), Number(monthFirst[2])); if (date) return { date, text: monthFirst[0] }; }
   const numeric = value.match(/\b(0?[1-9]|[12]\d|3[01])[-/.](0?[1-9]|1[0-2])[-/.](20\d{2})\b/);
-  if (numeric) return new Date(Number(numeric[3]), Number(numeric[2]) - 1, Number(numeric[1]));
+  if (numeric) { const date = validDate(Number(numeric[3]), Number(numeric[2]) - 1, Number(numeric[1])); if (date) return { date, text: numeric[0] }; }
   return undefined;
 }
 
 export function freshnessFromText(text: string, itemName: string, storageMethod: StorageMethod, purchasedAt = new Date()): { category: string; freshness: Freshness } {
   const label = text.match(/(?:best\s*(?:before|by)|use\s*by|expires?|exp(?:iry|iration)?)[^\n]{0,44}/i)?.[0];
   const labelDate = label ? parseDate(label) : undefined;
-  if (label && labelDate && !Number.isNaN(labelDate.valueOf())) return { category: categoryFor(itemName), freshness: { source: 'label', bestByDate: labelDate, confidence: 0.97, confidenceLabel: 'high', evidence: [`Printed date label detected: ${label.trim()}`] } };
+  if (label && labelDate) return { category: categoryFor(itemName), freshness: { source: 'label', bestByDate: labelDate.date, confidence: 0.97, confidenceLabel: 'high', evidence: [`Printed date label detected: ${label.trim()}`] } };
+  const packageDate = parseDate(text);
+  if (packageDate) return { category: categoryFor(itemName), freshness: { source: 'label', bestByDate: packageDate.date, confidence: 0.86, confidenceLabel: 'high', evidence: [`Package date detected from OCR: ${packageDate.text}`] } };
   const category = categoryFor(itemName);
   const [start, end] = rules[category][storageMethod];
   const confidence = category === 'unknown' ? 0.4 : 0.68;
