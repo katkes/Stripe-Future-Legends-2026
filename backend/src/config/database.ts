@@ -10,6 +10,10 @@ export function isMongoReady() {
   return mongoose.connection.readyState === 1;
 }
 
+export function isDatabaseConnected() {
+  return isMongoReady();
+}
+
 export function requireMongo() {
   if (!isMongoReady()) {
     throw new AppError(

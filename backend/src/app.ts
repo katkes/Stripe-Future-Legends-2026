@@ -9,7 +9,8 @@ import { notFound } from './middleware/not-found.js';
 import { apiRouter } from './routes/index.js';
 
 export const app = express();
-app.use(cors({ origin: env.clientOrigin, credentials: true }));
+const allowedOrigins = Array.from(new Set([env.clientOrigin, 'http://localhost:3000', 'http://127.0.0.1:3000']));
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.post('/api/v1/payments/webhook', express.raw({ type: 'application/json' }), (request, response, next) => {
   void handleStripeWebhook(request, response).catch(next);
 });
@@ -20,6 +21,7 @@ app.get('/health', (_request, response) =>
     name: 'openbasket-api',
     status: 'ok',
     mode: isMongoReady() ? 'mongo' : 'memory',
+    mongo: isMongoReady() ? 'connected' : 'disconnected',
     marketplace: true,
   }),
 );

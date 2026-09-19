@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc --noEmit",
-    "start": "tsx src/server.ts"
+    "start": "tsx src/server.ts",
+    "test": "tsx --test src/features/recipes/parse-recommendations.test.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
