@@ -7,7 +7,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc --noEmit",
     "start": "tsx src/server.ts",
-    "test": "tsx --test src/features/recipes/*.test.ts"
+    "test": "tsx --test src/features/recipes/*.test.ts src/features/receipts/*.test.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
