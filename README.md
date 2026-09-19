@@ -6,6 +6,8 @@ OpenBasket is an AI-powered grocery companion for turning receipts into a pantry
 
 `basket-web/` contains a polished, responsive React dashboard UI built with static demo content. It has no backend, AI, payments, storage, receipt upload, or live data wired in yet.
 
+`backend/` is a separate Express + TypeScript + MongoDB-ready API scaffold. It contains no product logic: feature endpoints are intentional placeholders until the respective team takes ownership. See [the backend architecture](backend/ARCHITECTURE.md) for the feature map and API boundaries.
+
 The dashboard already gives the team a shared visual target for these workstreams:
 
 - Receipt scanning and pantry updates
@@ -30,5 +32,10 @@ The dashboard already gives the team a shared visual target for these workstream
 
 ```bash
 cd basket-web
+npm run dev
+```
+
+```bash
+cd backend
 npm run dev
 ```
