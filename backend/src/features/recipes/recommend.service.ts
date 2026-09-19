@@ -1,5 +1,6 @@
 import { env } from '../../config/env.js';
 import { completeJson } from '../../shared/ai/chat-completions.js';
+import { recommendDemoRecipes } from './demo-recipes.js';
 import { parseRecommendationJson } from './parse-recommendations.js';
 import type { PantrySnapshot, RecommendationPayload } from './recipe-types.js';
 
@@ -19,6 +20,15 @@ export function buildUserPrompt(pantry: PantrySnapshot[], goal?: string) {
   return `Pantry:\n${pantryLines}${goalLine}\nRecommend 3 recipes that cook tonight with this food.`;
 }
 
+export function recommendWithDemo(pantry: PantrySnapshot[], goal?: string): RecommendationPayload {
+  return {
+    source: 'demo',
+    model: 'openbasket-demo',
+    pantryCount: pantry.length,
+    recipes: recommendDemoRecipes(pantry, goal),
+  };
+}
+
 export async function recommendWithAi(pantry: PantrySnapshot[], goal?: string): Promise<RecommendationPayload> {
   const content = await completeJson([
     { role: 'system', content: SYSTEM_PROMPT },
@@ -30,4 +40,14 @@ export async function recommendWithAi(pantry: PantrySnapshot[], goal?: string): 
     pantryCount: pantry.length,
     recipes: parseRecommendationJson(content),
   };
+}
+
+/** Prefer a live model when OPENAI_API_KEY is set; otherwise serve the demo catalog. */
+export async function recommendRecipes(pantry: PantrySnapshot[], goal?: string): Promise<RecommendationPayload> {
+  if (!process.env.OPENAI_API_KEY) return recommendWithDemo(pantry, goal);
+  try {
+    return await recommendWithAi(pantry, goal);
+  } catch {
+    return recommendWithDemo(pantry, goal);
+  }
 }

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { parseRecommendationJson } from './parse-recommendations.js';
+import { recommendDemoRecipes } from './demo-recipes.js';
 import { buildUserPrompt } from './recommend.service.js';
 
 test('parseRecommendationJson reads an OpenAI JSON object of recipes', () => {
@@ -37,4 +38,15 @@ test('buildUserPrompt includes pantry names and an optional cooking goal', () =>
   assert.match(prompt, /Baby spinach/);
   assert.match(prompt, /2026-09-21/);
   assert.match(prompt, /high protein/);
+});
+
+test('demo catalog ranks pantry-matching recipes first', () => {
+  const recipes = recommendDemoRecipes([{
+    name: 'Baby spinach',
+    category: 'leafy greens',
+    storageMethod: 'refrigerated',
+  }]);
+  assert.equal(recipes.length, 3);
+  assert.match(recipes[0]?.why ?? '', /spinach/);
+  assert.ok(recipes.every((recipe) => recipe.steps.length > 0));
 });

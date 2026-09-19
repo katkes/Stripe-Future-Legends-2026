@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import './recipes.css';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api/v1';
@@ -21,31 +21,45 @@ type Recipe = {
 
 type Payload = { source: string; model: string; pantryCount: number; recipes: Recipe[]; error?: string };
 
+async function loadRecommendations(goal = '') {
+  const query = goal.trim() ? `?goal=${encodeURIComponent(goal.trim())}` : '';
+  const response = await fetch(`${apiUrl}/recipes/recommendations${query}`, { credentials: 'include' });
+  const data = await response.json() as Payload;
+  if (!response.ok) throw new Error(data.error ?? 'Unable to recommend recipes.');
+  return data;
+}
+
 export default function RecipesPage() {
   const [goal, setGoal] = useState('');
-  const [status, setStatus] = useState('Ask OpenBasket for recipes based on your pantry.');
+  const [status, setStatus] = useState('Loading recipes from the API…');
   const [payload, setPayload] = useState<Payload | null>(null);
   const [selected, setSelected] = useState<Recipe | null>(null);
   const [busy, setBusy] = useState(false);
 
-  async function recommend(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function recommend(nextGoal = goal) {
     setBusy(true);
-    setStatus('Asking AI for recipes…');
-    setSelected(null);
+    setStatus('Loading recipes…');
     try {
-      const query = goal.trim() ? `?goal=${encodeURIComponent(goal.trim())}` : '';
-      const response = await fetch(`${apiUrl}/recipes/recommendations${query}`, { credentials: 'include' });
-      const data = await response.json() as Payload;
-      if (!response.ok) throw new Error(data.error ?? 'Unable to recommend recipes.');
+      const data = await loadRecommendations(nextGoal);
       setPayload(data);
-      setStatus(data.pantryCount ? `Using ${data.pantryCount} pantry item${data.pantryCount === 1 ? '' : 's'} · ${data.model}` : `No pantry on this session — general AI ideas · ${data.model}`);
+      setSelected(data.recipes[0] ?? null);
+      const source = data.source === 'demo' ? 'demo catalog' : data.model;
+      setStatus(data.pantryCount
+        ? `Using ${data.pantryCount} pantry item${data.pantryCount === 1 ? '' : 's'} · ${source}`
+        : `Demo recipes from the OpenBasket API · ${source}`);
     } catch (error) {
       setPayload(null);
-      setStatus(error instanceof Error ? error.message : 'Unable to recommend recipes.');
+      setStatus(error instanceof TypeError ? 'Cannot reach the API at localhost:4000. Start the backend, then refresh.' : (error instanceof Error ? error.message : 'Unable to recommend recipes.'));
     } finally {
       setBusy(false);
     }
+  }
+
+  useEffect(() => { void recommend(''); }, []);
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await recommend(goal);
   }
 
   return (
@@ -59,13 +73,13 @@ export default function RecipesPage() {
       </header>
       <section>
         <p>COOK WITH WHAT YOU HAVE</p>
-        <h1>AI recipes from your kitchen.</h1>
-        <form className="recipe-ask" onSubmit={recommend}>
+        <h1>Recipes from your kitchen.</h1>
+        <form className="recipe-ask" onSubmit={onSubmit}>
           <label>
             Optional goal
             <input value={goal} onChange={(event) => setGoal(event.target.value)} placeholder="Use spinach tonight, high protein, 20 minutes…" />
           </label>
-          <button disabled={busy}>{busy ? 'Thinking…' : 'Recommend recipes'}</button>
+          <button disabled={busy}>{busy ? 'Loading…' : 'Refresh recipes'}</button>
         </form>
         <div className="recipes-status">{status}</div>
         {payload?.recipes?.length ? (

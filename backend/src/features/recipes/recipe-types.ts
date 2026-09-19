@@ -27,7 +27,7 @@ export type RecommendedRecipe = {
 };
 
 export type RecommendationPayload = {
-  source: 'ai';
+  source: 'ai' | 'demo';
   model: string;
   pantryCount: number;
   recipes: RecommendedRecipe[];
