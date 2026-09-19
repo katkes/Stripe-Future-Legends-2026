@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { assertDatabaseConnected } from '../../config/database.js';
 import { AppError } from '../../core/errors/app-error.js';
 import { requireAuth } from '../auth/require-auth.js';
 import { User } from '../auth/user.model.js';
@@ -8,7 +7,6 @@ import { freshnessFromText } from './freshness.service.js';
 export const pantryRouter = Router();
 pantryRouter.get('/', requireAuth, async (request, response, next) => {
   try {
-    assertDatabaseConnected();
     const user = await User.findById(request.auth!.userId); if (!user) throw new AppError(404, 'User not found.');
     let updated = false;
     user.pantryItems.forEach((item) => {
@@ -24,7 +22,6 @@ pantryRouter.get('/', requireAuth, async (request, response, next) => {
 
 pantryRouter.patch('/:itemId/confirm-date', requireAuth, async (request, response, next) => {
   try {
-    assertDatabaseConnected();
     const { bestByDate } = request.body as { bestByDate?: string };
     if (!bestByDate || Number.isNaN(new Date(bestByDate).valueOf())) throw new AppError(400, 'Provide a valid bestByDate.');
     const user = await User.findById(request.auth!.userId); const item = user?.pantryItems.id(String(request.params.itemId));
@@ -36,7 +33,6 @@ pantryRouter.patch('/:itemId/confirm-date', requireAuth, async (request, respons
 
 pantryRouter.delete('/:itemId', requireAuth, async (request, response, next) => {
   try {
-    assertDatabaseConnected();
     const user = await User.findById(request.auth!.userId);
     const item = user?.pantryItems.id(String(request.params.itemId));
     if (!item) throw new AppError(404, 'Pantry item not found.');
