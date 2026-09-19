@@ -26,7 +26,7 @@ export async function verifyPassword(password: string, hash: string) { return bc
 export const authCookie = (token: string) => ({
   httpOnly: true,
   secure: env.nodeEnv === 'production',
-  sameSite: 'lax' as const,
+  sameSite: env.nodeEnv === 'production' ? 'none' as const : 'lax' as const,
   maxAge: 1000 * 60 * 60 * 24 * 7,
 });
 export { TOKEN_NAME };
