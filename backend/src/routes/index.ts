@@ -1,9 +1,11 @@
 import { Router } from 'express';
-import { createFeatureRouter } from '../shared/http/create-feature-router.js';
 import { authRouter } from '../features/auth/auth.routes.js';
 import { pantryRouter } from '../features/pantry/pantry.routes.js';
+import { paymentRouter } from '../features/payments/routes.js';
 import { receiptRouter } from '../features/receipts/receipt.routes.js';
 import { recipesRouter } from '../features/recipes/recipe.routes.js';
+import { vendorRouter } from '../features/vendors/routes.js';
+import { createFeatureRouter } from '../shared/http/create-feature-router.js';
 
 export const apiRouter = Router();
 apiRouter.use('/auth', authRouter);
@@ -14,5 +16,5 @@ apiRouter.use('/grocery-lists', createFeatureRouter('smart grocery lists'));
 apiRouter.use('/prices', createFeatureRouter('neighbourhood prices'));
 apiRouter.use('/impact', createFeatureRouter('nutrition and environmental impact'));
 apiRouter.use('/community', createFeatureRouter('community baskets and group orders'));
-apiRouter.use('/vendors', createFeatureRouter('local farmers and vendors'));
-apiRouter.use('/payments', createFeatureRouter('Stripe payments'));
+apiRouter.use('/vendors', vendorRouter);
+apiRouter.use('/payments', paymentRouter);

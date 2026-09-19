@@ -1,23 +1,41 @@
 import mongoose from 'mongoose';
-import { env } from './env.js';
 import { AppError } from '../core/errors/app-error.js';
+import { env } from './env.js';
 
 const MONGO_HINT = 'Allow this machine’s IP in Atlas Network Access, confirm backend/atlas-credentials.env, then restart the API.';
 
-export function isDatabaseConnected() {
+function mongoUriLooksUsable(uri: string) {
+  return Boolean(uri) && !uri.includes('<') && !uri.includes('cluster-host');
+}
+
+export function isMongoReady() {
   return mongoose.connection.readyState === 1;
 }
 
-export function assertDatabaseConnected() {
-  if (!isDatabaseConnected()) {
-    throw new AppError(503, `MongoDB is not connected. Sign-in needs Atlas. ${MONGO_HINT}`);
+export function isDatabaseConnected() {
+  return isMongoReady();
+}
+
+export function requireMongo() {
+  if (!isMongoReady()) {
+    throw new AppError(
+      503,
+      `MongoDB Atlas is not connected. In Atlas → Network Access, add this computer’s IP (or 0.0.0.0/0 for a short local test), wait until the entry is Active, then restart npm run dev:api. Health at http://localhost:4000/health should show "mode":"mongo". ${MONGO_HINT}`,
+    );
   }
+}
+
+export function assertDatabaseConnected() {
+  requireMongo();
 }
 
 /** Connect only when the local Atlas configuration supplies a database URI. */
 export async function connectDatabase() {
   mongoose.set('bufferCommands', false);
-  if (!env.mongoUri) { console.info('MongoDB is not configured; API is running in scaffold mode.'); return; }
+  if (!mongoUriLooksUsable(env.mongoUri)) {
+    console.info('MongoDB is not configured; marketplace will use in-memory storage.');
+    return false;
+  }
   try {
     await mongoose.connect(env.mongoUri, {
       user: env.mongoUsername || undefined,
@@ -25,8 +43,10 @@ export async function connectDatabase() {
       serverSelectionTimeoutMS: 8000,
     });
     console.info('Connected to MongoDB.');
+    return true;
   } catch (error) {
     const message = error instanceof Error ? error.message : 'unknown MongoDB error';
-    console.warn(`MongoDB is unreachable (${message}). ${MONGO_HINT}`);
+    console.warn(`MongoDB is unreachable (${message}). Marketplace will use in-memory storage. ${MONGO_HINT}`);
+    return false;
   }
 }
